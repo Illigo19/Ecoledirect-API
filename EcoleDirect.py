@@ -101,3 +101,39 @@ class EcoleDirect:
         else:
             # self.token = connection.json()['token']
             return connection.json()['data']
+        
+        #news
+    def GetWorkTimeById(self, ID = None,helpId = False,  startDate = datetime.date.today().strftime("%Y-%m-%d"), endDate = (datetime.date.today() + datetime.timedelta(days=6) ).strftime("%Y-%m-%d")):
+        """retrieves the content of the schedule according to the name of the given dictionary key  """
+        if ID == None: #checks if an ID is given
+            print("error ! Id not specified")
+        else:
+            """like GetWT()"""
+
+            """get the work time from the api"""
+            if self.token is None or self.id is None:
+                print("Error connection must be activate")
+                return
+
+            connection = self.__req('https://api.ecoledirecte.com/v3/E/{}/emploidutemps.awp?verbe=get&'.format(self.id), """data={}"token":"{}","dateDebut": "{}","dateFin": "{}","avecTrous": false,{}""".format("{", self.token,startDate,endDate, "}"))
+            if connection.json()['code'] != 200:
+                print("error ! bad username or password")
+            else:
+                # self.token = connection.json()['token']
+                #retrieves the contents of all dictionaries from the given key/ID
+                megaData = connection.json()['data']
+                IDlist = []
+                for x in range(0,len(megaData)):
+                    dataDico = megaData[x]
+                    IDlist.append(dataDico[ID])
+
+                    pass
+                
+                #bonus : allows to give all the IDs available in the schedule to the devs : obj.GetWorkTimeById("matiere", True)
+                if helpId:
+                    exemple = megaData[x]
+                    print("ID available : \n")
+                    for cle,valeur in exemple.items():
+                        print(cle) #give ID
+                    pass
+                return IDlist
