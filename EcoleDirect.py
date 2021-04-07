@@ -137,3 +137,58 @@ class EcoleDirect:
                         print(cle) #give ID
                     pass
                 return IDlist
+            
+            
+    def getMessage(self):
+        """get messagerie from the API"""
+        if self.token is None or self.id is None:
+            print("Error connection must be acitvate")
+            return 
+            
+        
+        connection = self.__req('https://api.ecoledirecte.com/v3/eleves/{}/messages.awp?verbe=getall&'.format(self.id),"""data={}"token":"{}"{}""".format("{", self.token, "}"))
+        
+        if connection.json()['code'] != 200:
+            print("error ! bad username or password")
+        else:
+            # self.token = connection.json()['token']
+            return connection.json()['data']
+
+    def getMessageById(self, ID = None, classe = None): # ID is the key content, classe is the class holds the message : received, sent
+        """get key of Message => exemple : "subject", "id" """
+        if ID == None:
+            print("error ! Id not specified")
+        else:
+            message = self.getMessage()
+            messages = message['messages']
+            try:
+                classe = messages[classe]
+                IdListMessage = []
+                for x in range(0,len(classe)):
+                    Group = classe[x]
+                    IdListMessage.append(Group[ID])
+                return IdListMessage
+
+            except:
+                print("error ! invalid class : ",classe," isn't valid")
+                print("class valid :\n")
+                for cle,valeur in messages.items():
+                    print(cle)
+                    pass
+    def getMessageContent(self, MessageId):
+        """get the content of message from the given ids, to get the ids => getMessageById('id', "received") ('received' only for received messages)"""
+        if self.token is None or self.id is None:
+            print("Error connection must be acitvate")
+            return 
+            
+        
+        connection = self.__req('https://api.ecoledirecte.com/v3/eleves/{}/messages/{}.awp?verbe=get&mode=destinataire'.format(self.id, MessageId),"""data={}"token":"{}"{}""".format("{", self.token, "}") )
+        
+        if connection.json()['code'] != 200:
+            print("error ! bad username or password")
+        else:
+            # self.token = connection.json()['token']
+            content =  connection.json()['data']
+            trueContent = content['content']
+            decrypte = base64.b64decode(trueContent)
+            print(decrypte)
